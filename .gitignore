@@ -1,0 +1,23 @@
+chroma_db/
+db/
+enhanced/
+generated_tests/
+main_reserve.py
+# Ignore Python cache files
+__pycache__/
+# Ignore Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+# Ignore virtual environment directories
+venv/
+# Ignore build directories
+build/
+# Ignore distribution directories
+dist/
+# Ignore coverage reports
+.coverage
+# Ignore logs
+*.log
+# Ignore environment variable files
+.env
+# Ignore IDE specific files
+.idea/

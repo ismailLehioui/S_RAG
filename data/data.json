@@ -1,0 +1,582 @@
+{
+    "dataset_info": {
+        "name": "STBTester Test Cases Dataset",
+        "version": "1.0",
+        "description": "Comprehensive dataset of STBTester test cases for Totalplay platform",
+        "total_records": 15,
+        "categories": [
+            "streaming",
+            "navigation",
+            "stability",
+            "video_playback",
+            "system"
+        ],
+        "applications": [
+            "Netflix",
+            "YouTube",
+            "Amazon Prime",
+            "Paramount+"
+        ],
+        "created_date": "2025-01-27"
+    },
+    "test_cases": [
+        {
+            "id": "TC_001",
+            "title": "YouTube sur Totalplay",
+            "category": "streaming",
+            "subcategory": "app_launch",
+            "application": "YouTube",
+            "platform": "Totalplay",
+            "test_type": "functional",
+            "complexity": "low",
+            "estimated_duration": "30 seconds",
+            "objective": "Vérifier que YouTube s'ouvre correctement",
+            "preconditions": "Le système Totalplay est allumé et sur Live TV",
+            "steps": [
+                {
+                    "step_number": 1,
+                    "action": "Ouvrir le menu principal",
+                    "expected_result": "Le menu s'affiche",
+                    "code_equivalent": "totalplay.Menu.to_menu()"
+                },
+                {
+                    "step_number": 2,
+                    "action": "Aller dans STREAMING et sélectionner YouTube",
+                    "expected_result": "YouTube démarre",
+                    "code_equivalent": "totalplay.select_menu_items(menu_item=\"STREAMING\"); totalplay.select_apps(name_app=\"Youtube\")"
+                },
+                {
+                    "step_number": 3,
+                    "action": "Sortir de YouTube",
+                    "expected_result": "Retour au menu principal",
+                    "code_equivalent": "sc_stbt.press_and_wait(\"KEY_MENU\", timeout_secs=6, stable_secs=2)"
+                }
+            ],
+            "code_snippet": "import time\nimport totalplay\nimport sc_stbt\n\nif __name__ == \"__main__\":\n    totalplay.Menu.to_live()\n    totalplay.Menu.to_menu()\n    totalplay.select_menu_items(menu_item=\"STREAMING\")\n    totalplay.select_apps(name_app=\"Youtube\")\n    time.sleep(10)\n    sc_stbt.press_and_wait(\"KEY_MENU\", timeout_secs=6, stable_secs=2)\n    time.sleep(10)",
+            "functions_used": [
+                "totalplay.Menu.to_live()",
+                "totalplay.Menu.to_menu()",
+                "totalplay.select_menu_items()",
+                "totalplay.select_apps()",
+                "sc_stbt.press_and_wait()",
+                "time.sleep()"
+            ],
+            "navigation_path": "Live TV → Menu → STREAMING → YouTube → Exit",
+            "tags": [
+                "youtube",
+                "streaming",
+                "menu_navigation",
+                "basic_functionality",
+                "app_launch",
+                "exit"
+            ],
+            "patterns": [
+                "standard_app_launch",
+                "menu_navigation",
+                "clean_exit"
+            ],
+            "related_tests": [
+                "TC_002",
+                "TC_003",
+                "TC_005"
+            ],
+            "maintenance_notes": "Stable test, rarely needs updates",
+            "last_updated": "2025-01-27"
+        },
+        {
+            "id": "TC_002",
+            "title": "YouTube sur Totalplay (simple)",
+            "category": "streaming",
+            "subcategory": "app_launch",
+            "application": "YouTube",
+            "platform": "Totalplay",
+            "test_type": "functional",
+            "complexity": "low",
+            "estimated_duration": "40 seconds",
+            "objective": "Vérifier que l'application YouTube se lance correctement depuis le menu STREAMING",
+            "preconditions": "Le système Totalplay est allumé et sur Live TV",
+            "steps": [
+                {
+                    "step_number": 1,
+                    "action": "Ouvrir le menu principal",
+                    "expected_result": "Le menu s'affiche",
+                    "code_equivalent": "totalplay.Menu.to_menu()"
+                },
+                {
+                    "step_number": 2,
+                    "action": "Naviguer vers STREAMING et le sélectionner",
+                    "expected_result": "Le sous-menu STREAMING s'ouvre",
+                    "code_equivalent": "totalplay.select_menu_items(menu_item=\"STREAMING\")"
+                },
+                {
+                    "step_number": 3,
+                    "action": "Sélectionner l'application YouTube",
+                    "expected_result": "YouTube se lance et s'affiche correctement",
+                    "code_equivalent": "totalplay.select_apps(name_app=\"YouTube\")"
+                },
+                {
+                    "step_number": 4,
+                    "action": "Attendre le chargement complet de YouTube",
+                    "expected_result": "L'interface YouTube est opérationnelle",
+                    "code_equivalent": "time.sleep(30)"
+                }
+            ],
+            "code_snippet": "import time\nimport totalplay\n\nif __name__ == '__main__':\n    totalplay.Menu.to_live()\n    totalplay.Menu.to_menu()\n    totalplay.select_menu_items(menu_item=\"STREAMING\")\n    totalplay.select_apps(name_app=\"YouTube\")\n    time.sleep(30)",
+            "functions_used": [
+                "totalplay.Menu.to_live()",
+                "totalplay.Menu.to_menu()",
+                "totalplay.select_menu_items()",
+                "totalplay.select_apps()",
+                "time.sleep()"
+            ],
+            "navigation_path": "Live TV → Menu → STREAMING → YouTube",
+            "tags": [
+                "youtube",
+                "streaming",
+                "menu_navigation",
+                "basic_functionality",
+                "app_launch"
+            ],
+            "patterns": [
+                "standard_app_launch",
+                "menu_navigation"
+            ],
+            "related_tests": [
+                "TC_001",
+                "TC_003",
+                "TC_005"
+            ],
+            "maintenance_notes": "Simple launch test without exit verification",
+            "last_updated": "2025-01-27"
+        },
+        {
+            "id": "TC_003",
+            "title": "Netflix sur Totalplay",
+            "category": "streaming",
+            "subcategory": "app_launch",
+            "application": "Netflix",
+            "platform": "Totalplay",
+            "test_type": "functional",
+            "complexity": "low",
+            "estimated_duration": "30 seconds",
+            "objective": "Vérifier que l'application Netflix se lance correctement et permet de revenir au menu principal",
+            "preconditions": "Le système Totalplay est allumé et sur Live TV",
+            "steps": [
+                {
+                    "step_number": 1,
+                    "action": "Ouvrir le menu principal",
+                    "expected_result": "Le menu s'affiche",
+                    "code_equivalent": "totalplay.Menu.to_menu()"
+                },
+                {
+                    "step_number": 2,
+                    "action": "Naviguer vers STREAMING et le sélectionner",
+                    "expected_result": "Le sous-menu STREAMING s'ouvre",
+                    "code_equivalent": "totalplay.select_menu_items(menu_item=\"STREAMING\")"
+                },
+                {
+                    "step_number": 3,
+                    "action": "Sélectionner l'application Netflix",
+                    "expected_result": "Netflix se lance et s'affiche correctement",
+                    "code_equivalent": "totalplay.select_apps(name_app=\"Netflix\")"
+                },
+                {
+                    "step_number": 4,
+                    "action": "Attendre le chargement complet de Netflix",
+                    "expected_result": "L'interface Netflix est opérationnelle",
+                    "code_equivalent": "time.sleep(10)"
+                },
+                {
+                    "step_number": 5,
+                    "action": "Appuyer sur la touche MENU pour sortir",
+                    "expected_result": "Retour au menu principal du système",
+                    "code_equivalent": "sc_stbt.press_and_wait(\"KEY_MENU\",timeout_secs=6, stable_secs=2)"
+                }
+            ],
+            "code_snippet": "import time\nimport totalplay\nimport sc_stbt\n\nif __name__ == '__main__':\n    totalplay.Menu.to_live()\n    totalplay.Menu.to_menu()\n    totalplay.select_menu_items(menu_item=\"STREAMING\")\n    totalplay.select_apps(name_app=\"Netflix\")\n    time.sleep(10)\n    sc_stbt.press_and_wait(\"KEY_MENU\",timeout_secs=6, stable_secs=2)\n    time.sleep(10)",
+            "functions_used": [
+                "totalplay.Menu.to_live()",
+                "totalplay.Menu.to_menu()",
+                "totalplay.select_menu_items()",
+                "totalplay.select_apps()",
+                "sc_stbt.press_and_wait()",
+                "time.sleep()"
+            ],
+            "navigation_path": "Live TV → Menu → STREAMING → Netflix → Exit",
+            "tags": [
+                "netflix",
+                "streaming",
+                "menu_navigation",
+                "basic_functionality",
+                "app_launch",
+                "exit"
+            ],
+            "patterns": [
+                "standard_app_launch",
+                "menu_navigation",
+                "clean_exit"
+            ],
+            "related_tests": [
+                "TC_001",
+                "TC_002",
+                "TC_004",
+                "TC_006"
+            ],
+            "maintenance_notes": "Standard Netflix launch with proper exit",
+            "last_updated": "2025-01-27"
+        },
+        {
+            "id": "TC_004",
+            "title": "Lecture vidéo Netflix sur Totalplay",
+            "category": "video_playback",
+            "subcategory": "streaming_video",
+            "application": "Netflix",
+            "platform": "Totalplay",
+            "test_type": "functional",
+            "complexity": "medium",
+            "estimated_duration": "15 minutes",
+            "objective": "Vérifier que Netflix lance et lit correctement une vidéo depuis le menu APPS",
+            "preconditions": "Le système Totalplay est allumé et accessible",
+            "steps": [
+                {
+                    "step_number": 1,
+                    "action": "Ouvrir le menu principal",
+                    "expected_result": "Le menu s'affiche",
+                    "code_equivalent": "totalplay.Menu.to_menu()"
+                },
+                {
+                    "step_number": 2,
+                    "action": "Naviguer vers APPS et le sélectionner",
+                    "expected_result": "Le menu des applications s'ouvre",
+                    "code_equivalent": "totalplay.select_menu_items(menu_item=\"APPS\")"
+                },
+                {
+                    "step_number": 3,
+                    "action": "Sélectionner l'application Netflix",
+                    "expected_result": "Netflix se lance",
+                    "code_equivalent": "totalplay.select_apps(name_app=\"Netflix\")"
+                },
+                {
+                    "step_number": 4,
+                    "action": "Rechercher et sélectionner un contenu avec bouton Play",
+                    "expected_result": "Le bouton de lecture apparaît",
+                    "code_equivalent": "sc_stbt.press_until(\"KEY_OK\", condition_lambda, interval_secs=4, timeout_secs=20)"
+                },
+                {
+                    "step_number": 5,
+                    "action": "Appuyer sur OK pour lancer la lecture",
+                    "expected_result": "La vidéo démarre",
+                    "code_equivalent": "sc_stbt.press_and_wait(key=\"KEY_OK\", timeout_secs=4)"
+                },
+                {
+                    "step_number": 6,
+                    "action": "Vérifier que la vidéo se lit correctement",
+                    "expected_result": "La lecture vidéo est fluide et stable",
+                    "code_equivalent": "sc_stbt.wait_for_motion(consecutive_frames=\"25/200\", timeout_secs=120)"
+                },
+                {
+                    "step_number": 7,
+                    "action": "Maintenir la lecture pendant 15 minutes",
+                    "expected_result": "La vidéo continue de jouer sans interruption",
+                    "code_equivalent": "time.sleep(900)"
+                }
+            ],
+            "code_snippet": "import time\nimport totalplay\nimport sc_stbt\nimport stbt_core as stbt\n\ntemplates = sc_stbt.get_generic_template_path(trunk_template=False)\n\nif __name__ == '__main__':\n    totalplay.Menu.to_menu()\n    totalplay.select_menu_items(menu_item=\"APPS\")\n    totalplay.select_apps(name_app=\"Netflix\")\n    time.sleep(10)\n    sc_stbt.press_until(\"KEY_OK\",lambda : sc_stbt.match(image=templates +\"play_video.png\") or \n                                sc_stbt.match(image=templates + \"Play_video_Netflx.png\",region=stbt.Region(x=39,y=205,width=441,height=281)),\n                                        interval_secs=4,timeout_secs=20)\n    sc_stbt.press_and_wait(key=\"KEY_OK\",timeout_secs=4)\n    try : sc_stbt.wait_for_motion(consecutive_frames=\"25/200\",\n                                    timeout_secs=120,\n                                    noise_threshold=0.95)\n    except :\n        assert 0, 'Netflix video not opened'\n    time.sleep(900)",
+            "functions_used": [
+                "totalplay.Menu.to_menu()",
+                "totalplay.select_menu_items()",
+                "totalplay.select_apps()",
+                "sc_stbt.press_until()",
+                "sc_stbt.press_and_wait()",
+                "sc_stbt.wait_for_motion()",
+                "sc_stbt.match()",
+                "sc_stbt.get_generic_template_path()",
+                "time.sleep()"
+            ],
+            "navigation_path": "Menu → APPS → Netflix → Video Selection → Play → Long Playback",
+            "tags": [
+                "netflix",
+                "video_playback",
+                "apps",
+                "long_duration",
+                "motion_detection",
+                "template_matching",
+                "error_handling"
+            ],
+            "patterns": [
+                "apps_menu_launch",
+                "video_playback",
+                "template_matching",
+                "motion_detection",
+                "error_assertion"
+            ],
+            "related_tests": [
+                "TC_003",
+                "TC_006",
+                "TC_007"
+            ],
+            "maintenance_notes": "May need template updates if Netflix UI changes. Includes error handling for video playback.",
+            "last_updated": "2025-01-27"
+        },
+        {
+            "id": "TC_005",
+            "title": "Basculement répété Netflix - Live TV sur Totalplay",
+            "category": "stability",
+            "subcategory": "app_switching",
+            "application": "Netflix",
+            "platform": "Totalplay",
+            "test_type": "stress",
+            "complexity": "medium",
+            "estimated_duration": "5 minutes",
+            "objective": "Vérifier la stabilité du système lors de basculements répétés entre Netflix et la télévision en direct",
+            "preconditions": "Le système Totalplay est allumé et sur Live TV",
+            "steps": [
+                {
+                    "step_number": 1,
+                    "action": "Cycle de basculement répété 3 fois",
+                    "expected_result": "Le système reste stable à chaque basculement",
+                    "sub_steps": [
+                        {
+                            "step": "1a",
+                            "action": "Aller sur Live TV",
+                            "expected_result": "Le système affiche la télévision en direct"
+                        },
+                        {
+                            "step": "1b",
+                            "action": "Ouvrir le menu principal",
+                            "expected_result": "Le menu s'affiche"
+                        },
+                        {
+                            "step": "1c",
+                            "action": "Naviguer vers STREAMING et sélectionner Netflix",
+                            "expected_result": "Netflix se lance correctement"
+                        },
+                        {
+                            "step": "1d",
+                            "action": "Attendre le chargement de Netflix",
+                            "expected_result": "L'interface Netflix est opérationnelle"
+                        },
+                        {
+                            "step": "1e",
+                            "action": "Retourner au menu principal",
+                            "expected_result": "Le menu s'affiche à nouveau"
+                        },
+                        {
+                            "step": "1f",
+                            "action": "Revenir sur Live TV",
+                            "expected_result": "La télévision en direct s'affiche"
+                        },
+                        {
+                            "step": "1g",
+                            "action": "Effectuer un zapping sur la chaîne 1",
+                            "expected_result": "La chaîne change avec affichage de la bannière d'information"
+                        }
+                    ]
+                }
+            ],
+            "code_snippet": "import totalplay\nimport sc_stbt\nimport time\n\ntemplates = sc_stbt.get_generic_template_path(trunk_template=False)\ninfo_banner = templates + \"info_banner/info_banner.png\"\n\nif __name__ == \"__main__\":\n    def switch_between_netflix_live():\n        totalplay.Menu.to_live()\n        totalplay.Menu.to_menu()\n        totalplay.select_menu_items(menu_item=\"STREAMING\")\n        totalplay.select_apps(name_app=\"Netflix\")\n        time.sleep(10)\n        totalplay.Menu.to_menu()\n        totalplay.Menu.to_live()\n        time.sleep(10)\n        sc_stbt.zapping_v3(\n            lcn=\"1\",\n            info_banner_template=info_banner,\n            info_banner=True,\n            detect_motion=False,\n            timeout_secs=20,\n        )\n    sc_stbt.repeat(lambda: switch_between_netflix_live(), occurence=3)",
+            "functions_used": [
+                "totalplay.Menu.to_live()",
+                "totalplay.Menu.to_menu()",
+                "totalplay.select_menu_items()",
+                "totalplay.select_apps()",
+                "sc_stbt.zapping_v3()",
+                "sc_stbt.repeat()",
+                "sc_stbt.get_generic_template_path()",
+                "time.sleep()"
+            ],
+            "navigation_path": "[Live TV → Menu → STREAMING → Netflix → Menu → Live TV → Zapping] × 3",
+            "tags": [
+                "netflix",
+                "stability",
+                "stress_test",
+                "app_switching",
+                "zapping",
+                "repeated_cycles",
+                "info_banner"
+            ],
+            "patterns": [
+                "repeated_execution",
+                "app_switching",
+                "stability_test",
+                "zapping"
+            ],
+            "related_tests": [
+                "TC_003",
+                "TC_008",
+                "TC_009"
+            ],
+            "maintenance_notes": "Stress test for system stability. Monitor for memory leaks or performance degradation.",
+            "last_updated": "2025-01-27"
+        },
+        {
+            "id": "TC_006",
+            "title": "Test de stabilité longue durée Netflix sur Totalplay",
+            "category": "stability",
+            "subcategory": "long_duration",
+            "application": "Netflix",
+            "platform": "Totalplay",
+            "test_type": "endurance",
+            "complexity": "high",
+            "estimated_duration": "1 hour",
+            "objective": "Vérifier la stabilité de lecture Netflix pendant une heure sans écran noir ni blocage",
+            "preconditions": "Le système Totalplay est allumé et sur Live TV",
+            "steps": [
+                {
+                    "step_number": 1,
+                    "action": "Lancer Netflix et démarrer une vidéo",
+                    "expected_result": "La lecture vidéo commence",
+                    "sub_steps": [
+                        {
+                            "step": "1a",
+                            "action": "Aller sur Live TV",
+                            "expected_result": "Le système affiche la télévision en direct"
+                        },
+                        {
+                            "step": "1b",
+                            "action": "Ouvrir le menu principal",
+                            "expected_result": "Le menu s'affiche"
+                        },
+                        {
+                            "step": "1c",
+                            "action": "Naviguer vers STREAMING et sélectionner Netflix",
+                            "expected_result": "Netflix se lance"
+                        },
+                        {
+                            "step": "1d",
+                            "action": "Passer l'écran de connexion si nécessaire",
+                            "expected_result": "Accès à l'interface principale Netflix"
+                        },
+                        {
+                            "step": "1e",
+                            "action": "Ouvrir et lancer une vidéo",
+                            "expected_result": "La lecture vidéo démarre"
+                        }
+                    ]
+                },
+                {
+                    "step_number": 2,
+                    "action": "Surveiller la lecture pendant 1 heure",
+                    "expected_result": "Vérification continue de l'absence d'écran noir et de la fluidité vidéo",
+                    "details": "Contrôle régulier toutes les 20 secondes"
+                },
+                {
+                    "step_number": 3,
+                    "action": "Contrôler régulièrement la détection de mouvement",
+                    "expected_result": "La vidéo continue de jouer sans interruption"
+                },
+                {
+                    "step_number": 4,
+                    "action": "Sortir de Netflix à la fin du test",
+                    "expected_result": "Retour au système Totalplay"
+                }
+            ],
+            "code_snippet": "import stbt_core as stbt\nimport time\nimport totalplay\nimport sc_stbt\nfrom sc_stbt import netflix\n\noccurrence = 8\nexit_dirty = eval(sc_stbt.get_config(\"netflix\", \"dirty_exit\"))\nkeys = [\"KEY_DOWN\", \"KEY_RIGHT\", \"KEY_LEFT\", \"KEY_UP\"]\ntest_duration = 3600\n\ndef open_netflix():\n    totalplay.Menu.to_live()\n    totalplay.Menu.to_menu()\n    totalplay.select_menu_items(menu_item=\"STREAMING\")\n    totalplay.select_apps(name_app=\"Netflix\")\n    time.sleep(30)\n    netflix.Menu().skip_sign_in()\n    time.sleep(5)\n    netflix.Video().open_video()\n\nif __name__ == \"__main__\":\n    open_netflix()\n    start_time = time.time()\n    end_time = start_time + test_duration\n    while time.time() <= end_time:\n        time.sleep(20)\n        assert sc_stbt.wait_until(\n            lambda: not sc_stbt.is_screen_black(\n                region=stbt.Region(x=0, y=105, width=961, height=434)\n            ),\n            timeout_secs=120,\n        ), \"Blackscreen detected\"\n        sc_stbt.wait_for_motion(consecutive_frames=\"20/500\", timeout_secs=300)\n    netflix.Menu().exit(exit_dirty)",
+            "functions_used": [
+                "totalplay.Menu.to_live()",
+                "totalplay.Menu.to_menu()",
+                "totalplay.select_menu_items()",
+                "totalplay.select_apps()",
+                "netflix.Menu().skip_sign_in()",
+                "netflix.Video().open_video()",
+                "netflix.Menu().exit()",
+                "sc_stbt.wait_until()",
+                "sc_stbt.is_screen_black()",
+                "sc_stbt.wait_for_motion()",
+                "sc_stbt.get_config()",
+                "time.time()",
+                "time.sleep()"
+            ],
+            "navigation_path": "Live TV → Menu → STREAMING → Netflix → Sign-in → Video → [1h monitoring] → Exit",
+            "tags": [
+                "netflix",
+                "stability",
+                "endurance_test",
+                "black_screen_detection",
+                "motion_detection",
+                "long_duration",
+                "monitoring"
+            ],
+            "patterns": [
+                "endurance_testing",
+                "continuous_monitoring",
+                "black_screen_detection",
+                "netflix_helpers"
+            ],
+            "related_tests": [
+                "TC_003",
+                "TC_004",
+                "TC_005"
+            ],
+            "maintenance_notes": "Long duration test requiring stable environment. Monitor system resources during execution.",
+            "last_updated": "2025-01-27"
+        },
+        {
+            "id": "TC_007",
+            "title": "Zapping séquentiel descendant depuis la chaîne 108 sur Totalplay",
+            "category": "navigation",
+            "subcategory": "channel_zapping",
+            "application": "Live TV",
+            "platform": "Totalplay",
+            "test_type": "functional",
+            "complexity": "low",
+            "estimated_duration": "1 minute",
+            "objective": "Vérifier le bon fonctionnement du zapping vers le bas avec affichage des informations de chaîne",
+            "preconditions": "Le système Totalplay est allumé et accessible",
+            "steps": [
+                {
+                    "step_number": 1,
+                    "action": "Aller sur Live TV",
+                    "expected_result": "Le système affiche la télévision en direct",
+                    "code_equivalent": "tpl.Menu.to_live()"
+                },
+                {
+                    "step_number": 2,
+                    "action": "Saisir 108 avec la télécommande",
+                    "expected_result": "Navigation vers la chaîne 108",
+                    "code_equivalent": "for i in [\"1\", \"0\", \"8\"]: sc_stbt.press(\"KEY_%s\" % i)"
+                },
+                {
+                    "step_number": 3,
+                    "action": "Attendre l'affichage de la chaîne 108",
+                    "expected_result": "La chaîne se charge correctement",
+                    "code_equivalent": "time.sleep(8)"
+                },
+                {
+                    "step_number": 4,
+                    "action": "Répéter le zapping descendant 7 fois",
+                    "expected_result": "Navigation fluide entre les chaînes avec affichage correct des informations",
+                    "details": "Utilise CHANNEL_DOWN avec vérification bannière info et numéro de chaîne"
+                }
+            ],
+            "code_snippet": "import sc_stbt\nimport totalplay as tpl\nimport stbt_core as stbt\nimport time\n\noccurence = 7\ninterval_sec = 5\nregion_info_banner = stbt.Region(x=150, y=467, width=723, height=12)\nregion_channel_number = stbt.Region(x=150, y=479, width=99, height=19)\ntemplates = sc_stbt.get_generic_template_path(trunk_template=False)\ninfo_banner = templates + \"info_banner/info_banner.png\"\n\ntpl.Menu.to_live()\nfor i in [\"1\", \"0\", \"8\"]:\n    sc_stbt.press(\"KEY_%s\" % i)\n    time.sleep(0.5)\n\ntime.sleep(8)\nfor _ in range(occurence):\n    tpl.zapping_Totalplay(\n        key=\"KEY_CHANNELDOWN\",\n        info_banner=True,\n        detect_motion=False,\n        info_banner_template=info_banner,\n        info_banner_region=region_info_banner,\n        channel_number=True,\n        channel_number_region=region_channel_number,\n        timeout_secs=20,\n    )\n    time.sleep(5)",
+            "functions_used": [
+                "tpl.Menu.to_live()",
+                "sc_stbt.press()",
+                "tpl.zapping_Totalplay()",
+                "sc_stbt.get_generic_template_path()",
+                "time.sleep()"
+            ],
+            "navigation_path": "Live TV → Channel 108 → [CHANNEL_DOWN] × 7",
+            "tags": [
+                "zapping",
+                "channel_navigation",
+                "info_banner",
+                "channel_number",
+                "sequential_navigation",
+                "live_tv"
+            ],
+            "patterns": [
+                "channel_direct_input",
+                "sequential_zapping",
+                "info_banner_verification"
+            ],
+            "related_tests": [
+                "TC_008",
+                "TC_009"
+            ],
+            "maintenance_notes": "Test assumes channel 108 exists and is accessible. May need adjustment for different channel lineups.",
+            "last_updated": "2025-01-27"
+        }
+    ]
+}
