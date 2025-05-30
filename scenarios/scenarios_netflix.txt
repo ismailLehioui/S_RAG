@@ -1,0 +1,28 @@
+ Lancer Netflix depuis le menu STREAMING, naviguer à droite trois fois, sélectionner un film, lancer la lecture et attendre 15 minutes avant de quitter l’application. »
+
+2.
+« Ouvrir Netflix, effectuer une déconnexion si un compte est connecté, se reconnecter avec un autre compte, puis vérifier l’accès à la page d’accueil. »
+
+3.
+« Depuis Live TV, ouvrir Netflix, lancer la première vidéo recommandée, puis toutes les 10 minutes appuyer sur pause et reprendre la lecture, pendant 1 heure. »
+
+4.
+« Lancer Netflix, naviguer dans les menus vers la section ‘Séries’, sélectionner la première série, lancer l’épisode 2, attendre 5 minutes, puis revenir à l’accueil Netflix. »
+
+5.
+« Ouvrir Netflix, rechercher le film ‘Inception’, lancer la lecture, vérifier qu’il n’y a pas d’écran noir pendant 20 minutes, puis quitter proprement. »
+
+6.
+« Depuis le menu principal, ouvrir Netflix, naviguer à gauche deux fois, puis en haut, sélectionner un profil enfant, et lancer la lecture d’un dessin animé. »
+
+7.
+« Lancer Netflix, attendre le chargement, puis effectuer un zapping rapide entre trois profils différents, en vérifiant que chaque changement de profil affiche la page d’accueil correspondante. »
+
+8.
+« Ouvrir Netflix, lancer une vidéo, puis toutes les 5 minutes ouvrir la bannière info et vérifier que le titre du contenu est correct, pendant 30 minutes. »
+
+9.
+« Depuis Live TV, ouvrir Netflix, naviguer dans la section ‘Nouveautés’, sélectionner un contenu, lancer la lecture, puis revenir à Live TV après 10 minutes. »
+
+10.
+« Lancer Netflix, naviguer dans la section ‘Continuer à regarder’, reprendre la lecture d’un contenu en cours, attendre 10 minutes, puis quitter Netflix. »

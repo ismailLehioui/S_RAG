@@ -1,0 +1,35 @@
+Titre : Endurance multi-apps avec zapping et détection écran noir
+Objectif : Vérifier la stabilité du système lors de l’enchaînement de lancements d’applications (YouTube, Netflix, Amazon) et de zapping, avec détection d’écran noir.
+Étapes principales :
+
+Aller sur Live TV
+Lancer YouTube depuis STREAMING, attendre 10s
+Quitter YouTube proprement
+Lancer Netflix depuis STREAMING, attendre 10s
+Quitter Netflix proprement
+Lancer Amazon depuis STREAMING, attendre 10s
+Quitter Amazon proprement
+Zapper sur 5 chaînes différentes (avec détection d’info banner)
+Répéter la séquence 3 fois
+SCENARIO_RAG_002
+Titre : Lecture vidéo longue durée multi-apps avec navigation périodique
+Objectif : Vérifier la performance du système lors de lectures vidéo prolongées sur différentes apps, avec navigation périodique et détection d’écran noir.
+Étapes principales :
+
+Aller sur Live TV
+Lancer Netflix, jouer une vidéo 20min (détection écran noir)
+Lancer YouTube, jouer une vidéo 20min (détection écran noir)
+Lancer Amazon, jouer une vidéo 20min (détection écran noir)
+Pendant chaque lecture, toutes les 5min, naviguer dans l’interface (flèches)
+Retourner sur Live TV
+SCENARIO_RAG_003
+Titre : Stress test navigation rapide entre apps et chaînes
+Objectif : Tester la robustesse du système lors de changements rapides entre applications et chaînes TV.
+Étapes principales :
+
+Aller sur Live TV
+Lancer YouTube, attendre 5s, quitter
+Lancer Netflix, attendre 5s, quitter
+Lancer Amazon, attendre 5s, quitter
+Zapper rapidement entre 100, 101, 102, 103, 104 (1s d’attente entre chaque)
+Répéter la séquence 5 fois

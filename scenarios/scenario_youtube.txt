@@ -1,0 +1,18 @@
+« Démarrer YouTube, attendre le chargement, vérifier qu’il n’y a pas d’écran noir pendant 1 heure, puis sortir de l’application. »
+
+4. Navigation complexe et retour menu
+Scénario :
+« Aller sur YouTube via STREAMING, naviguer à droite et en bas, attendre 20 secondes, puis revenir au menu principal. »
+
+5. Endurance avec navigation aléatoire
+Scénario :
+« Lancer YouTube, naviguer dans plusieurs directions (haut, bas, droite, gauche) en boucle pendant 10 minutes, puis quitter. »
+
+6. Test de connexion/déconnexion
+Scénario :
+« Ouvrir YouTube, effectuer une déconnexion si un compte est connecté, puis se reconnecter et vérifier l’accès à la page d’accueil. »
+
+7. Test d’accès à une playlist spécifique
+Scénario :
+« Lancer YouTube, rechercher une playlist nommée ‘Tests Automatisés’, lancer la première vidéo, puis quitter après 2 minutes de lecture. »
+

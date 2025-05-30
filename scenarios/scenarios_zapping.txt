@@ -1,0 +1,28 @@
+1. Zapping séquentiel avec pause
+Scénario :
+« Depuis Live TV, zapper successivement de la chaîne 100 à la chaîne 105 en utilisant KEY_CHANNELUP, avec une pause de 3 secondes entre chaque zapping. »
+
+2. Zapping alterné haut/bas
+Scénario :
+« Depuis la chaîne 110, zapper trois fois vers le haut puis deux fois vers le bas, en vérifiant l’affichage de la bannière info à chaque fois. »
+
+3. Zapping vers une chaîne radio puis retour à une chaîne TV
+Scénario :
+« Aller sur la chaîne radio, attendre 5 secondes, puis revenir sur la chaîne 101 et vérifier que la bannière info s’affiche correctement. »
+
+4. Zapping rapide sur une liste de chaînes favorites
+Scénario :
+« Depuis Live TV, zapper rapidement sur les chaînes favorites [102, 105, 108, 110], en vérifiant la détection de mouvement à chaque changement. »
+
+5. Zapping avec détection d’erreur
+Scénario :
+« Depuis la chaîne 100, zapper vers une chaîne inexistante (ex : 999), puis revenir sur la chaîne 100 et vérifier qu’aucune erreur n’est affichée. »
+
+6. Zapping cyclique
+Scénario :
+« Depuis la chaîne 101, zapper vers le haut jusqu’à la chaîne 105, puis redescendre jusqu’à la chaîne 101, en affichant la bannière info à chaque étape. »
+
+7. Zapping avec attente longue
+Scénario :
+« Depuis Live TV, zapper sur la chaîne 113, attendre 30 secondes, puis zapper sur la chaîne 100 et attendre 10 secondes. »
+

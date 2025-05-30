@@ -1,0 +1,29 @@
+# Example Customer Journey scenarios in YAML format
+scenarios:
+  - |
+    Démarrer sur Live TV
+    Aller sur Netflix depuis l'accueil
+    Regarder une vidéo pendant 5 minutes
+    Quitter Netflix
+    Aller sur YouTube
+    Lancer une vidéo recommandée
+    Quitter YouTube
+    Revenir sur Live TV
+  - |
+    Depuis Live TV, lancer Amazon Prime Video
+    Sélectionner un contenu et lancer la lecture
+    Mettre en pause après 1 minute
+    Quitter Amazon Prime Video
+    Aller sur Netflix
+    Lancer la lecture d'une série
+    Quitter Netflix
+    Revenir sur Live TV
+  - |
+    Depuis Live TV, zapper sur 3 chaînes différentes
+    Aller sur YouTube
+    Lancer une vidéo
+    Quitter YouTube
+    Aller sur Amazon Prime Video
+    Lancer un film
+    Quitter Amazon Prime Video
+    Revenir sur Live TV

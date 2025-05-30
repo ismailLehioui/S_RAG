@@ -1,0 +1,19 @@
+# Example Netflix scenarios in YAML format
+scenarios:
+  - |
+    Ouvrir l'application Netflix depuis l'accueil
+    Attendre que l'application soit chargée
+    Sélectionner un profil utilisateur
+    Reprendre la lecture d'une série en cours
+    Mettre en pause après 15 secondes
+    Quitter Netflix proprement
+  - |
+    Depuis Live TV, lancer Netflix
+    Naviguer dans les catégories
+    Sélectionner un film au hasard
+    Lancer la lecture et vérifier l'affichage des contrôles
+    Quitter l'application après 2 minutes
+  - |
+    Lancer Netflix depuis STREAMING
+    Attendre 3 secondes
+    Quitter Netflix proprement

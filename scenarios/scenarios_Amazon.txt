@@ -1,0 +1,9 @@
+"Aller sur Live TV\nAller dans STREAMING et sélectionner Amazon\nAttendre le chargement d'Amazon\nLancer une vidéo Amazon\nAttendre 10 minutes\nQuitter Amazon proprement\nRetourner sur Live TV"
+
+"Aller sur Live TV\nAller dans STREAMING et sélectionner Amazon\nAttendre le chargement d'Amazon\nNaviguer dans l'interface Amazon (flèches)\nLancer une vidéo\nAttendre 5 minutes\nVérifier l'absence d'écran noir\nQuitter Amazon proprement"
+
+"Aller sur Live TV\nAller dans STREAMING et sélectionner Amazon\nAttendre le chargement d'Amazon\nLancer Amazon Music\nVérifier par OCR que 'AMAZON' est affiché\nAttendre 2 minutes\nQuitter Amazon proprement"
+
+"Aller sur Live TV\nAller dans STREAMING et sélectionner Amazon\nAttendre le chargement d'Amazon\nLancer une vidéo\nToutes les 2 minutes, appuyer sur pause puis lecture\nAttendre 20 minutes\nQuitter Amazon proprement"
+
+"Aller sur Live TV\nAller dans STREAMING et sélectionner Amazon\nAttendre le chargement d'Amazon\nLancer une vidéo\nPendant 1 heure, vérifier toutes les 5 minutes qu'il n'y a pas d'écran noir\nQuitter Amazon proprement"

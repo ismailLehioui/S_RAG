@@ -1,0 +1,23 @@
+# Example Zapping scenarios in YAML format
+scenarios:
+  - |
+    Depuis Live TV, zapper sur la chaîne 1
+    Attendre 2 secondes
+    Zap sur la chaîne 2
+    Attendre 2 secondes
+    Zap sur la chaîne 3
+    Attendre 2 secondes
+    Zap sur la chaîne 4
+    Attendre 2 secondes
+    Zap sur la chaîne 5
+    Attendre 2 secondes
+  - |
+    Depuis Live TV, zapper rapidement sur 10 chaînes différentes
+    Vérifier l'affichage de la bannière d'information à chaque zap
+    Revenir à la chaîne d'origine
+  - |
+    Depuis Live TV, zapper sur une chaîne aléatoire
+    Attendre 5 secondes
+    Zap sur une autre chaîne
+    Attendre 5 secondes
+    Répéter la séquence 3 fois

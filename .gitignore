@@ -3,6 +3,9 @@ db/
 enhanced/
 generated_tests/
 main_reserve.py
+data/
+# Ignore Python bytecode files
+*.pyc
 # Ignore Python cache files
 __pycache__/
 # Ignore Jupyter Notebook checkpoints
