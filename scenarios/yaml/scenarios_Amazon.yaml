@@ -8,18 +8,17 @@ scenarios:
     Quitter YouTube proprement
     Lancer Amazon depuis STREAMING, attendre 20s
     Quitter Amazon proprement
-    Zapper sur 5 chaînes différentes (avec détection d’info banner)
-    Répéter la séquence 10 fois
-  - |
-    Lancer Amazon Prime Video depuis l'accueil
-    Attendre que l'application soit chargée
-    Sélectionner un contenu et lancer la lecture
-    Mettre en pause après 30 secondes
-    Reprendre la lecture
-    Quitter Amazon Prime Video proprement
-  - |
-    Depuis Live TV, ouvrir Amazon Prime Video
-    Naviguer dans le carrousel principal
-    Sélectionner un film au hasard
-    Lancer la lecture et vérifier l'affichage des contrôles
-    Quitter l'application après 2 minutes
+
+  # - |
+  #   Lancer Amazon Prime Video depuis l'accueil
+  #   Attendre que l'application soit chargée
+  #   Sélectionner un contenu et lancer la lecture
+  #   Mettre en pause après 30 secondes
+  #   Reprendre la lecture
+  #   Quitter Amazon Prime Video proprement
+  # - |
+  #   Depuis Live TV, ouvrir Amazon Prime Video
+  #   Naviguer dans le carrousel principal
+  #   Sélectionner un film au hasard
+  #   Lancer la lecture et vérifier l'affichage des contrôles
+  #   Quitter l'application après 2 minutes

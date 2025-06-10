@@ -3,18 +3,14 @@ scenarios:
   - |
     Ouvrir l'application YouTube depuis l'accueil
     Attendre que l'application soit chargée
-    Rechercher une vidéo spécifique
-    Lancer la lecture de la vidéo
-    Mettre en pause après 10 secondes
-    Reprendre la lecture
     Quitter YouTube proprement
-  - |
-    Depuis Live TV, lancer YouTube
-    Naviguer dans les vidéos recommandées
-    Sélectionner une vidéo au hasard
-    Lancer la lecture et vérifier l'affichage des contrôles
-    Quitter l'application après 1 minute
-  - |
-    Lancer YouTube depuis STREAMING
-    Attendre 5 secondes
-    Quitter YouTube proprement
+  # - |
+  #   Depuis Live TV, lancer YouTube
+  #   Naviguer dans les vidéos recommandées
+  #   Sélectionner une vidéo au hasard
+  #   Lancer la lecture et vérifier l'affichage des contrôles
+  #   Quitter l'application après 1 minute
+  # - |
+  #   Lancer YouTube depuis STREAMING
+  #   Attendre 5 secondes
+  #   Quitter YouTube proprement

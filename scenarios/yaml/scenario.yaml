@@ -1,0 +1,10 @@
+scenarios:
+  - |
+    Aller sur Live TV
+    Accéder au menu principal
+    Naviguer vers STREAMING et sélectionner Netflix
+    Confirmer la sélection de Netflix
+    Attendre le chargement de Netflix (10 secondes)
+    Lancer la première vidéo recommandée
+    Répéter pendant 1 heure : Lecture 10 min, Pause, Lecture
+    Quitter Netflix proprement

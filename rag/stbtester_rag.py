@@ -1,5 +1,7 @@
 import re
 import logging
+import os
+import hashlib
 from typing import List, Dict, Any
 from langchain_community.embeddings import OllamaEmbeddings
 from langchain_community.vectorstores import Chroma
@@ -215,12 +217,78 @@ SCRIPT PYTHON STBTester:
             "import stbt",
             "import totalplay",
             "import sc_stbt",
-            "import time"
+            "import time",
         ]
         lines = script.splitlines()
-        existing_imports = set(line.strip() for line in lines if line.strip().startswith("import "))
+        existing_imports = set(
+            line.strip() for line in lines if line.strip().startswith("import ")
+        )
         missing = [imp for imp in required_imports if imp not in existing_imports]
         # Ajoute les imports manquants en haut du script
         if missing:
             script = "\n".join(missing) + "\n" + script
         return script
+
+    def get_file_hash(self, filepath):
+        """Calcule le hash SHA256 d'un fichier."""
+        h = hashlib.sha256()
+        with open(filepath, 'rb') as f:
+            while True:
+                chunk = f.read(8192)
+                if not chunk:
+                    break
+                h.update(chunk)
+        return h.hexdigest()
+
+    def ensure_vectorstore(self, json_data: Dict[str, Any], data_path: str = None):
+        """
+        Charge la vectorstore depuis le disque si elle existe et que le dataset n'a pas changé, sinon la (re)génère.
+        """
+        db_path = "db"
+        hash_path = os.path.join(db_path, "data_hash.txt")
+        if data_path is None:
+            data_path = "data/all_data.json"
+        current_hash = self.get_file_hash(data_path)
+        previous_hash = None
+        if os.path.exists(hash_path):
+            with open(hash_path, "r", encoding="utf-8") as f:
+                previous_hash = f.read().strip()
+        # Si la vectorstore existe ET le hash n'a pas changé, on charge
+        if os.path.exists(db_path) and os.listdir(db_path) and previous_hash == current_hash:
+            self.vectorstore = Chroma(
+                embedding_function=self.embeddings, persist_directory=db_path
+            )
+            logger.info("✅ Vectorstore chargée depuis le disque (pas de ré-embedding)")
+        else:
+            self.load_test_cases_data(json_data)
+            # Sauvegarde le hash courant
+            os.makedirs(db_path, exist_ok=True)
+            with open(hash_path, "w", encoding="utf-8") as f:
+                f.write(current_hash)
+
+    def stream_generate_script(self, user_query: str):
+        """
+        Génère un script STBTester en streaming (token par token ou bloc par bloc).
+        Utilise le mode streaming du LLM Ollama.
+        """
+        if not hasattr(self, "qa_chain"):
+            self.setup_qa_chain()
+        try:
+            similar_tests = self.search_similar_tests(user_query, k=5)
+            context = "\n\n".join([doc["content"] for doc in similar_tests])
+            # On utilise le LLM en mode streaming
+            # On suppose que self.llm supporte .stream (Ollama le supporte)
+            prompt = self.prompt_template.format(context=context, question=user_query)
+            stream = self.llm.stream(prompt)
+            script = ""
+            for chunk in stream:
+                script += chunk
+                yield chunk  # On yield chaque morceau dès qu'il arrive
+        except Exception as e:
+            logger.error(f"❌ Erreur génération script (stream): {e}")
+            raise
+
+    # Remplace l'appel à load_test_cases_data par ensure_vectorstore dans le pipeline principal
+    # Exemple d'utilisation dans scenario_runner.py :
+    # rag.ensure_vectorstore(json_data)
+    # rag.setup_qa_chain()

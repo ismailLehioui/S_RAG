@@ -3,6 +3,9 @@ db/
 enhanced/
 generated_tests/
 main_reserve.py
+pydantic-venv/
+presentation/
+reserve
 data/
 # Ignore Python bytecode files
 *.pyc
