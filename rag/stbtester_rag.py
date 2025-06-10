@@ -232,7 +232,7 @@ SCRIPT PYTHON STBTester:
     def get_file_hash(self, filepath):
         """Calcule le hash SHA256 d'un fichier."""
         h = hashlib.sha256()
-        with open(filepath, 'rb') as f:
+        with open(filepath, "rb") as f:
             while True:
                 chunk = f.read(8192)
                 if not chunk:
@@ -254,7 +254,11 @@ SCRIPT PYTHON STBTester:
             with open(hash_path, "r", encoding="utf-8") as f:
                 previous_hash = f.read().strip()
         # Si la vectorstore existe ET le hash n'a pas changé, on charge
-        if os.path.exists(db_path) and os.listdir(db_path) and previous_hash == current_hash:
+        if (
+            os.path.exists(db_path)
+            and os.listdir(db_path)
+            and previous_hash == current_hash
+        ):
             self.vectorstore = Chroma(
                 embedding_function=self.embeddings, persist_directory=db_path
             )
