@@ -166,15 +166,12 @@ with st.sidebar:
     conv_ids = [conv["id"] for conv in conversations_index]
     if len(conv_titles) == 0:
         st.write("Aucune conversation. Créez-en une !")
-    safe_idx = st.session_state.get("selected_conv_idx", 0)
-    if not conv_titles or safe_idx < 0 or safe_idx >= len(conv_titles):
-        safe_idx = 0
     selected_idx = (
         st.radio(
             "Conversations :",
             options=list(range(len(conv_titles))),
             format_func=lambda i: conv_titles[i] if conv_titles else "",
-            index=safe_idx,
+            index=st.session_state.get("selected_conv_idx", 0) if conv_titles else 0,
             key="conv_radio",
         )
         if conv_titles
@@ -228,163 +225,102 @@ else:
 # Affichage de l'historique structuré
 for i, msg in enumerate(st.session_state.messages):
     if msg["role"] == "user":
-        st.markdown(f"**Utilisateur :** {msg['content']}")
-    else:
-        # Affichage assistant : ne met pas en gras les lignes commençant par 'Étape'
-        lines = msg["content"].splitlines()
-        formatted = []
-        for line in lines:
-            if line.strip().startswith("Étape"):
-                formatted.append(line)  # Pas de gras
-            else:
-                formatted.append(line)
         st.markdown(
-            f"<div style='background-color:#f0f2f6; padding:8px; border-radius:6px;'><b>Assistant :</b><br>{'<br>'.join(formatted)}</div>",
+            f"<div style='background-color:#e8e8e8; padding:8px; border-radius:6px; margin-bottom:2px; font-size:14px;'>Utilisateur : {msg['content']}</div>",
+            unsafe_allow_html=True,
+        )
+    else:
+        # Supprime tous les titres markdown (##, ###, etc.) et liens d'ancrage générés par Streamlit
+        import re
+
+        cleaned = msg["content"]
+        # Supprime les titres markdown (##, ###, etc.)
+        cleaned = re.sub(r"^(#+) ?(.*)$", r"\2", cleaned, flags=re.MULTILINE)
+        # Supprime les balises HTML (h1-h6, a, span, svg, etc.)
+        cleaned = re.sub(r"<h[1-6][^>]*>.*?</h[1-6]>", "", cleaned, flags=re.DOTALL)
+        cleaned = re.sub(r"<a[^>]*>.*?</a>", "", cleaned, flags=re.DOTALL)
+        cleaned = re.sub(r"<span[^>]*>.*?</span>", "", cleaned, flags=re.DOTALL)
+        cleaned = re.sub(r"<svg[^>]*>.*?</svg>", "", cleaned, flags=re.DOTALL)
+        cleaned = re.sub(r"<[^>]+>", "", cleaned)  # supprime tout tag HTML résiduel
+        st.markdown(
+            f"<div style='background-color:#f0f2f6; padding:8px; border-radius:6px; margin-bottom:2px; font-size:14px; font-family: 'Segoe UI', Arial, sans-serif;'><pre style='font-size:12px; font-family:monospace; background:transparent; border:none; margin:0; padding:0; white-space:pre-wrap;'>{cleaned}</pre></div>",
             unsafe_allow_html=True,
         )
     # Séparation visuelle entre chaque échange
     if i < len(st.session_state.messages) - 1:
-        st.markdown("<hr style='margin:8px 0;'>", unsafe_allow_html=True)
+        st.markdown(
+            "<hr style='margin:8px 0; border: none; border-top: 1px solid #ccc; background: none; height: 1px;'>",
+            unsafe_allow_html=True,
+        )
 
 # Entrée utilisateur
 prompt = st.chat_input("Décrivez un scénario de test ou posez une question...")
 
 if prompt:
-    # Cas spécial : question sur la dernière question posée
-    if "dernier question" in prompt.lower():
-        previous_questions = [
-            m["content"] for m in st.session_state.messages if m["role"] == "user"
-        ]
-        if previous_questions:
-            last_question = previous_questions[-1]
-            response = f"Votre dernière question était :\n\n{last_question}"
-        else:
-            response = "Je n'ai pas trouvé de question précédente dans l'historique."
-        st.session_state.messages.append({"role": "user", "content": prompt})
-        st.markdown(f"**Utilisateur :** {prompt}")
-        st.session_state.messages.append({"role": "assistant", "content": response})
-        st.markdown(response)
-        with open(history_path, "w", encoding="utf-8") as f_conv:
-            json.dump(st.session_state.messages, f_conv, ensure_ascii=False, indent=2)
-        st.stop()
+    # Affiche immédiatement la question de l'utilisateur dans l'historique
     st.session_state.messages.append({"role": "user", "content": prompt})
-    st.markdown(f"**Utilisateur :** {prompt}")
-    keywords = [
-        "script",
-        "test",
-        "stbtester",
-        "python",
-        "automatisation",
-        "génère",
-        "écris",
-        "générer",
-        "automatiser",
-    ]
-    if any(kw in prompt.lower() for kw in keywords):
-        # --- Génération de script STBTester ---
-        try:
-            code_placeholder = st.empty()
-            script = ""
-            reasoning = ""
-            with st.spinner("Le modèle réfléchit ..."):
-                for chunk in rag.stream_generate_script(prompt):
-                    script += chunk
-                    code_only = ""
-                    if "```python" in script:
-                        start = script.find("```python") + len("```python")
-                        end = script.find("```", start)
-                        if end != -1:
-                            code_only = script[start:end].strip()
-                            reasoning = (
-                                script[: start - len("```python")].strip()
-                                + "\n"
-                                + script[end + len("```") :].strip()
-                            ).strip()
-                        else:
-                            code_only = script[start:].strip()
-                            reasoning = script[: start - len("```python")].strip()
+    st.markdown(
+        f"<div style='background-color:#e8e8e8; padding:8px; border-radius:6px; margin-bottom:2px;'>Utilisateur : {prompt}</div>",
+        unsafe_allow_html=True,
+    )
+    # --- Génération de script STBTester via RAG pour toute question ---
+    try:
+        code_placeholder = st.empty()
+        script = ""
+        reasoning = ""
+        with st.spinner("Le modèle réfléchit et génère le script..."):
+            for chunk in rag.stream_generate_script(prompt):
+                script += chunk
+                code_only = ""
+                if "```python" in script:
+                    start = script.find("```python") + len("```python")
+                    end = script.find("```", start)
+                    if end != -1:
+                        code_only = script[start:end].strip()
+                        reasoning = (
+                            script[: start - len("```python")].strip()
+                            + "\n"
+                            + script[end + len("```") :].strip()
+                        ).strip()
                     else:
-                        reasoning = script
-                    filtered_code = "\n".join(
-                        line
-                        for line in code_only.splitlines()
-                        if all(
-                            token not in line.lower()
-                            for token in ["think", "réflexion", "reflection"]
-                        )
+                        code_only = script[start:].strip()
+                        reasoning = script[: start - len("```python")].strip()
+                else:
+                    reasoning = script
+                filtered_code = "\n".join(
+                    line
+                    for line in code_only.splitlines()
+                    if all(
+                        token not in line.lower()
+                        for token in ["think", "réflexion", "reflection"]
                     )
-                    code_placeholder.code(filtered_code, language="python")
-            response = (
-                filtered_code
-                if filtered_code.strip()
-                else "Aucun code Python valide n'a été généré. Reformulez votre demande."
+                )
+                code_placeholder.code(filtered_code, language="python")
+        response = (
+            filtered_code
+            if filtered_code.strip()
+            else "Aucun code Python valide n'a été généré. Reformulez votre demande."
+        )
+        if filtered_code.strip():
+            output_dir = "generated_tests/streamlit"
+            os.makedirs(output_dir, exist_ok=True)
+            script_filename = os.path.join(
+                output_dir, f"test_streamlit_{len(os.listdir(output_dir))+1}.py"
             )
-            if filtered_code.strip():
-                output_dir = "generated_tests/streamlit"
-                os.makedirs(output_dir, exist_ok=True)
-                script_filename = os.path.join(
-                    output_dir, f"test_streamlit_{len(os.listdir(output_dir))+1}.py"
-                )
-                with open(script_filename, "w", encoding="utf-8") as f_script:
-                    f_script.write(filtered_code)
-                st.success(
-                    f"Script sauvegardé automatiquement dans : {script_filename}"
-                )
-            # Affichage du raisonnement/thinking dans un expander si présent (mais pas dans l'historique)
+            with open(script_filename, "w", encoding="utf-8") as f_script:
+                f_script.write(filtered_code)
+            st.success(f"Script sauvegardé automatiquement dans : {script_filename}")
+        # Affichage du raisonnement/thinking uniquement si le modèle a généré explicitement un <think>
+        if "<think>" in script or "think" in script.lower():
             if reasoning.strip():
                 with st.expander(
                     "Afficher/masquer le raisonnement du modèle (optionnel)"
                 ):
                     st.info(reasoning.strip())
-        except Exception as e:
-            response = f"Erreur lors de la génération du script : {e}"
-        # Ne sauvegarde que le code/texte visible dans l'historique
-        st.session_state.messages.append({"role": "assistant", "content": response})
-        st.chat_message("assistant").write(response)
-    else:
-        # --- Mode conversationnel classique avec streaming ---
-        try:
-            response_placeholder = st.empty()
-            stream_response = ""
-            thinking = ""
-            with st.spinner("Le modèle réfléchit..."):
-                if hasattr(rag.llm, "stream"):
-                    for chunk in rag.llm.stream(prompt):
-                        stream_response += chunk
-                        # Séparation du thinking si balises <think> détectées
-                        if "<think>" in stream_response:
-                            start = stream_response.find("<think>") + len("<think>")
-                            end = stream_response.find("</think>", start)
-                            if end != -1:
-                                thinking = stream_response[start:end].strip()
-                                visible_response = (
-                                    stream_response[: start - len("<think>")].strip()
-                                    + stream_response[end + len("</think>") :].strip()
-                                )
-                            else:
-                                visible_response = stream_response.replace(
-                                    "<think>", ""
-                                )
-                        else:
-                            visible_response = stream_response
-                        response_placeholder.markdown(visible_response)
-                else:
-                    stream_response = rag.llm(prompt)
-                    response_placeholder.markdown(stream_response)
-            response = (
-                visible_response if "visible_response" in locals() else stream_response
-            )
-            # Affichage du thinking dans un expander si présent (mais pas dans l'historique)
-            if thinking.strip():
-                with st.expander(
-                    "Afficher/masquer le raisonnement du modèle (optionnel)"
-                ):
-                    st.info(thinking.strip())
-        except Exception as e:
-            response = f"Erreur lors de la génération de la réponse : {e}"
-        # Ne sauvegarde que la réponse visible dans l'historique
-        st.session_state.messages.append({"role": "assistant", "content": response})
-        st.chat_message("assistant").write(response)
+    except Exception as e:
+        response = f"Erreur lors de la génération du script : {e}"
+    # Ne sauvegarde que le code/texte visible dans l'historique
+    st.session_state.messages.append({"role": "assistant", "content": response})
     # Sauvegarde de l'historique de conversation après chaque échange (sans reasoning/thinking)
     with open(history_path, "w", encoding="utf-8") as f_conv:
         json.dump(st.session_state.messages, f_conv, ensure_ascii=False, indent=2)
