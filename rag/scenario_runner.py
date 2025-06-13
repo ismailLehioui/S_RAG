@@ -1,4 +1,7 @@
 from rag.stbtester_rag import STBTesterRAG
+
+# from rag.stbtester_rag_openai import STBTesterRAGOpenAI
+
 from rag.data_loader import load_json_data, ensure_output_dir
 import os
 

@@ -1,11 +1,8 @@
-import re
-import logging
 import os
-import hashlib
+import logging
 from typing import List, Dict, Any
-from langchain_community.embeddings import OllamaEmbeddings
+from langchain_openai import OpenAIEmbeddings, ChatOpenAI
 from langchain_community.vectorstores import Chroma
-from langchain_community.llms import Ollama
 from langchain.prompts import PromptTemplate
 from langchain.chains import RetrievalQA
 from langchain.schema import Document
@@ -14,14 +11,14 @@ from chromadb.config import Settings
 logger = logging.getLogger(__name__)
 
 
-class STBTesterRAG:
+class STBTesterRAGOpenAI:
     def __init__(
         self,
-        ollama_base_url: str = "http://localhost:11434",
-        model_name: str = "qwen3:8b",
+        openai_api_key: str = None,
+        model_name: str = "gpt-3.5-turbo",
         persist_directory: str = "./chroma_db",
     ):
-        self.ollama_base_url = ollama_base_url
+        self.openai_api_key = openai_api_key or os.getenv("OPENAI_API_KEY")
         self.model_name = model_name
         self.persist_directory = persist_directory
         self._init_embeddings()
@@ -31,27 +28,23 @@ class STBTesterRAG:
 
     def _init_embeddings(self):
         try:
-            self.embeddings = OllamaEmbeddings(
-                base_url=self.ollama_base_url,
-                model="nomic-embed-text",
-            )
-            logger.info("✅ Embeddings initialisés")
+            self.embeddings = OpenAIEmbeddings(api_key=self.openai_api_key)
+            logger.info("✅ Embeddings OpenAI initialisés")
         except Exception as e:
-            logger.error(f" Erreur initialisation embeddings: {e}")
+            logger.error(f"Erreur initialisation embeddings OpenAI: {e}")
             raise
 
     def _init_llm(self):
         try:
-            self.llm = Ollama(
-                base_url=self.ollama_base_url,
-                model=self.model_name,
+            self.llm = ChatOpenAI(
+                api_key=self.openai_api_key,
+                model_name=self.model_name,
                 temperature=0.1,
-                top_p=0.9,
-                num_ctx=4096,
+                max_tokens=2048,
             )
-            logger.info(f"✅ LLM {self.model_name} initialisé")
+            logger.info(f"✅ LLM OpenAI {self.model_name} initialisé")
         except Exception as e:
-            logger.error(f" Erreur initialisation LLM: {e}")
+            logger.error(f"Erreur initialisation LLM OpenAI: {e}")
             raise
 
     def _init_vectorstore(self):
@@ -62,26 +55,13 @@ class STBTesterRAG:
             self.vectorstore = None
             logger.info("✅ ChromaDB initialisé")
         except Exception as e:
-            logger.error(f" Erreur initialisation ChromaDB: {e}")
+            logger.error(f"Erreur initialisation ChromaDB: {e}")
             raise
 
     def _init_qa_chain(self):
         self.prompt_template = PromptTemplate(
             input_variables=["context", "question"],
-            template="""
-Tu es un expert en automatisation de tests STBTester pour la plateforme Totalplay.
-Utilise UNIQUEMENT les informations du contexte fourni pour répondre à la demande de l'utilisateur.
-CONTEXTE:
-{context}
-DEMANDE:
-{question}
-INSTRUCTIONS :
-- Si la demande décrit un scénario de test, génère un script Python STBTester complet et fonctionnel, avec tous les imports nécessaires.
-- Si la demande concerne la documentation, le fonctionnement, le rôle du framework, une question fréquente ou une explication sur une fonction, réponds par une explication textuelle claire et concise, sans générer de code.
-- Utilise exactement les fonctions et informations du contexte.
-- Si la question ne correspond à aucun cas connu, indique-le poliment.
-RÉPONSE :
-""",
+            template="""Tu es un expert en automatisation de tests STBTester pour la plateforme Totalplay.\nUtilise UNIQUEMENT les informations du contexte fourni pour générer un script Python STBTester.\nCONTEXTE:\n{context}\nDEMANDE:\n{question}\nINSTRUCTIONS:\n1. Génère un script Python complet et fonctionnel\n2. Utilise EXACTEMENT les mêmes fonctions que dans les exemples du contexte\n3. Respecte la structure et les patterns des scripts existants\n4. Inclus tous les imports nécessaires \n5. Assure-toi que le script soit prêt à l'exécution\nSCRIPT PYTHON STBTester:\n```python""",
         )
 
     def load_test_cases_data(self, json_data: Dict[str, Any]):
@@ -186,21 +166,16 @@ RÉPONSE :
         return results
 
     def setup_qa_chain(self):
-        """Configure la chaîne QA avec le retriever"""
         if not self.vectorstore:
             raise ValueError("Vectorstore non initialisé. Chargez d'abord les données.")
-
         retriever = self.vectorstore.as_retriever(
-            search_type="mmr",  # Maximum Marginal Relevance
+            search_type="mmr",
             search_kwargs={
-                "k": 5,  # Top 5 documents les plus pertinents
-                "fetch_k": 10,  # Récupère 10 docs puis sélectionne 5
-                "lambda_mult": 0.7,  # Balance diversité/similarité
+                "k": 5,
+                "fetch_k": 10,
+                "lambda_mult": 0.7,
             },
         )
-
-        from langchain.chains import RetrievalQA
-
         self.qa_chain = RetrievalQA.from_chain_type(
             llm=self.llm,
             chain_type="stuff",
@@ -208,11 +183,9 @@ RÉPONSE :
             chain_type_kwargs={"prompt": self.prompt_template},
             return_source_documents=True,
         )
-
-        logger.info(" Chaîne QA configurée")
+        logger.info(" Chaîne QA OpenAI configurée")
 
     def add_missing_imports(self, script: str) -> str:
-        """Ajoute les imports Python nécessaires si manquants dans le script généré."""
         required_imports = [
             "import stbt",
             "import totalplay",
@@ -224,75 +197,6 @@ RÉPONSE :
             line.strip() for line in lines if line.strip().startswith("import ")
         )
         missing = [imp for imp in required_imports if imp not in existing_imports]
-        # Ajoute les imports manquants en haut du script
         if missing:
             script = "\n".join(missing) + "\n" + script
         return script
-
-    def get_file_hash(self, filepath):
-        """Calcule le hash SHA256 d'un fichier."""
-        h = hashlib.sha256()
-        with open(filepath, "rb") as f:
-            while True:
-                chunk = f.read(8192)
-                if not chunk:
-                    break
-                h.update(chunk)
-        return h.hexdigest()
-
-    def ensure_vectorstore(self, json_data: Dict[str, Any], data_path: str = None):
-        """
-        Charge la vectorstore depuis le disque si elle existe et que le dataset n'a pas changé, sinon la (re)génère.
-        """
-        db_path = "db"
-        hash_path = os.path.join(db_path, "data_hash.txt")
-        if data_path is None:
-            data_path = "data/all_data.json"
-        current_hash = self.get_file_hash(data_path)
-        previous_hash = None
-        if os.path.exists(hash_path):
-            with open(hash_path, "r", encoding="utf-8") as f:
-                previous_hash = f.read().strip()
-        # Si la vectorstore existe ET le hash n'a pas changé, on charge
-        if (
-            os.path.exists(db_path)
-            and os.listdir(db_path)
-            and previous_hash == current_hash
-        ):
-            self.vectorstore = Chroma(
-                embedding_function=self.embeddings, persist_directory=db_path
-            )
-            logger.info("✅ Vectorstore chargée depuis le disque (pas de ré-embedding)")
-        else:
-            self.load_test_cases_data(json_data)
-            # Sauvegarde le hash courant
-            os.makedirs(db_path, exist_ok=True)
-            with open(hash_path, "w", encoding="utf-8") as f:
-                f.write(current_hash)
-
-    def stream_generate_script(self, user_query: str):
-        """
-        Génère un script STBTester en streaming (token par token ou bloc par bloc).
-        Utilise le mode streaming du LLM Ollama.
-        """
-        if not hasattr(self, "qa_chain"):
-            self.setup_qa_chain()
-        try:
-            similar_tests = self.search_similar_tests(user_query, k=5)
-            context = "\n\n".join([doc["content"] for doc in similar_tests])
-            # On utilise le LLM en mode streaming
-            # On suppose que self.llm supporte .stream (Ollama le supporte)
-            prompt = self.prompt_template.format(context=context, question=user_query)
-            stream = self.llm.stream(prompt)
-            script = ""
-            for chunk in stream:
-                script += chunk
-                yield chunk  # On yield chaque morceau dès qu'il arrive
-        except Exception as e:
-            logger.error(f"❌ Erreur génération script (stream): {e}")
-            raise
-
-    # Remplace l'appel à load_test_cases_data par ensure_vectorstore dans le pipeline principal
-    # Exemple d'utilisation dans scenario_runner.py :
-    # rag.ensure_vectorstore(json_data)
-    # rag.setup_qa_chain()

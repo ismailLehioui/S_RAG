@@ -1,5 +1,7 @@
 import streamlit as st
 from rag.stbtester_rag import STBTesterRAG
+
+# from rag.stbtester_rag_openai import STBTesterRAGOpenAI
 import json
 import os
 import uuid
@@ -271,59 +273,40 @@ if prompt:
         with st.spinner("Le modèle réfléchit et génère le script..."):
             for chunk in rag.stream_generate_script(prompt):
                 script += chunk
-                code_only = ""
-                if "```python" in script:
-                    start = script.find("```python") + len("```python")
-                    end = script.find("```", start)
-                    if end != -1:
-                        code_only = script[start:end].strip()
-                        reasoning = (
-                            script[: start - len("```python")].strip()
-                            + "\n"
-                            + script[end + len("```") :].strip()
-                        ).strip()
-                    else:
-                        code_only = script[start:].strip()
-                        reasoning = script[: start - len("```python")].strip()
-                else:
-                    reasoning = script
-                filtered_code = "\n".join(
-                    line
-                    for line in code_only.splitlines()
-                    if all(
-                        token not in line.lower()
-                        for token in ["think", "réflexion", "reflection"]
-                    )
-                )
-                code_placeholder.code(filtered_code, language="python")
-        response = (
-            filtered_code
-            if filtered_code.strip()
-            else "Aucun code Python valide n'a été généré. Reformulez votre demande."
+        # Séparation raisonnement <think>...</think> et réponse finale
+        import re
+
+        think_match = re.search(
+            r"<think>(.*?)</think>", script, re.DOTALL | re.IGNORECASE
         )
-        if filtered_code.strip():
-            output_dir = "generated_tests/streamlit"
-            os.makedirs(output_dir, exist_ok=True)
-            script_filename = os.path.join(
-                output_dir, f"test_streamlit_{len(os.listdir(output_dir))+1}.py"
-            )
-            with open(script_filename, "w", encoding="utf-8") as f_script:
-                f_script.write(filtered_code)
-            st.success(f"Script sauvegardé automatiquement dans : {script_filename}")
+        if think_match:
+            reasoning = think_match.group(1).strip()
+            # Retire la partie <think>...</think> de la réponse finale
+            response_finale = re.sub(
+                r"<think>.*?</think>", "", script, flags=re.DOTALL | re.IGNORECASE
+            ).strip()
+        else:
+            response_finale = script.strip()
+        # Affichage de la réponse finale (hors raisonnement)
+        st.session_state.messages.append(
+            {"role": "assistant", "content": response_finale}
+        )
+        st.markdown(
+            f"<div style='background-color:#f0f2f6; padding:8px; border-radius:6px; margin-bottom:2px; font-size:14px; font-family: 'Segoe UI', Arial, sans-serif;'><pre style='font-size:12px; font-family:monospace; background:transparent; border:none; margin:0; padding:0; white-space:pre-wrap;'>{response_finale}</pre></div>",
+            unsafe_allow_html=True,
+        )
         # Affichage du raisonnement/thinking uniquement si le modèle a généré explicitement un <think>
-        if "<think>" in script or "think" in script.lower():
-            if reasoning.strip():
-                with st.expander(
-                    "Afficher/masquer le raisonnement du modèle (optionnel)"
-                ):
-                    st.info(reasoning.strip())
+        if reasoning:
+            with st.expander("Afficher/masquer le raisonnement du modèle (optionnel)"):
+                st.info(reasoning)
+        # Sauvegarde de l'historique de conversation après chaque échange
+        with open(history_path, "w", encoding="utf-8") as f_conv:
+            json.dump(st.session_state.messages, f_conv, ensure_ascii=False, indent=2)
     except Exception as e:
         response = f"Erreur lors de la génération du script : {e}"
-    # Ne sauvegarde que le code/texte visible dans l'historique
-    st.session_state.messages.append({"role": "assistant", "content": response})
-    # Sauvegarde de l'historique de conversation après chaque échange (sans reasoning/thinking)
-    with open(history_path, "w", encoding="utf-8") as f_conv:
-        json.dump(st.session_state.messages, f_conv, ensure_ascii=False, indent=2)
+        st.session_state.messages.append({"role": "assistant", "content": response})
+        with open(history_path, "w", encoding="utf-8") as f_conv:
+            json.dump(st.session_state.messages, f_conv, ensure_ascii=False, indent=2)
 
 # st.info(
 #     "Ce chatbot génère des scripts de test STBTester à partir de scénarios en langage naturel grâce à votre pipeline RAG."
