@@ -1,0 +1,82 @@
+# Exemples de scénarios STBTester (format texte)
+
+---
+
+Titre : Lancer Netflix, lire une vidéo et quitter proprement
+Plateforme : Totalplay
+Application : Netflix
+Catégorie : streaming
+Objectif : Vérifier l'ouverture de Netflix, la lecture d'une vidéo et la sortie propre.
+Préconditions : Le système Totalplay est allumé et sur Live TV.
+Étapes :
+  1. Aller sur Live TV (totalplay.Menu().to_live())
+  2. Ouvrir le menu principal (totalplay.Menu().to_menu())
+  3. Aller dans STREAMING et sélectionner Netflix (totalplay.Menu().select_menu_items('STREAMING'); netflix.Menu().select_apps('Netflix'))
+  4. Attendre le chargement de Netflix (time.sleep(10))
+  5. Ouvrir une vidéo Netflix (netflix.Video().open_video())
+  6. Quitter Netflix proprement (netflix.Menu().exit())
+
+---
+
+Titre : Zapping entre plusieurs chaînes
+Plateforme : Totalplay
+Application : Totalplay
+Catégorie : navigation
+Objectif : Vérifier le zapping entre les chaînes 101, 102 et 103.
+Préconditions : Le système est sur Live TV.
+Étapes :
+  1. Aller sur Live TV (totalplay.Menu().to_live())
+  2. Zapper sur la chaîne 101 (sc_stbt.press('KEY_1'); sc_stbt.press('KEY_0'); sc_stbt.press('KEY_1'))
+  3. Zapper sur la chaîne 102 (sc_stbt.press('KEY_1'); sc_stbt.press('KEY_0'); sc_stbt.press('KEY_2'))
+  4. Zapper sur la chaîne 103 (sc_stbt.press('KEY_1'); sc_stbt.press('KEY_0'); sc_stbt.press('KEY_3'))
+
+---
+
+Titre : Lecture longue sur Amazon Prime Video
+Plateforme : Totalplay
+Application : Amazon
+Catégorie : stability
+Objectif : Vérifier la stabilité de lecture vidéo sur Amazon pendant 1 heure.
+Préconditions : Le système est sur Live TV.
+Étapes :
+  1. Aller sur Live TV (totalplay.Menu().to_live())
+  2. Ouvrir Amazon Prime Video (totalplay.Menu().select_menu_items('STREAMING'); amazon.Menu().select_apps('Amazon'))
+  3. Attendre le chargement (time.sleep(10))
+  4. Ouvrir une vidéo (amazon.Video().open_video())
+  5. Lire la vidéo pendant 1h (time.sleep(3600))
+  6. Quitter Amazon (amazon.Menu().exit())
+
+---
+
+Titre : Pause et reprise vidéo sur Youtube
+Plateforme : Totalplay
+Application : Youtube
+Catégorie : video_playback
+Objectif : Tester la pause et la reprise d'une vidéo Youtube.
+Préconditions : Le système est sur Live TV et Youtube est lancé.
+Étapes :
+  1. Ouvrir une vidéo Youtube 
+  2. Mettre en pause 
+  3. Attendre 5 secondes 
+  4. Reprendre la lecture 
+
+---
+
+Titre : Navigation dans le menu principal
+Plateforme : Totalplay
+Application : Totalplay
+Catégorie : navigation
+Objectif : Vérifier la navigation dans tous les items du menu principal.
+Préconditions : Le système est sur Live TV.
+Étapes :
+  1. Ouvrir le menu principal (totalplay.Menu().to_menu())
+  2. Naviguer dans tous les items (for item in menu_items: totalplay.Menu().select_menu_items(item))
+
+
+
+
+
+je veux un scenario stbtester qui fait ça Aller sur Live TV puis Aller dans STREAMING et sélectionner youtube , Attendre le chargement de youtube pandant 10s, Lancer une vidéo youtube apres Attendre 2 minutes, pause video pandant 10s, play video puis retourne au menu de youtube puis relire un video sans faire la navigation puis avancer dans le video ensuite retourne au menu youtube , Aller dans STREAMING, Quitter youtube proprement en fin Retourner sur Live TV
+
+
+ je veux un scenario stbtester qui fait ça Aller sur Live TV puis Aller dans STREAMING et sélectionner youtube , Attendre le chargement de youtube pandant 10s, Lancer une vidéo youtube apres Attendre 2 minutes, pause video pandant 10s, play video puis retourne au menu de youtube puis relire un video sans faire la navigation puis avancer dans le video ensuite retourne au menu youtube , Aller dans STREAMING, Quitter youtube proprement en fin Retourner sur Live TV ouvre netflix et faire les meme steps s'il y a un erreur dans youtube

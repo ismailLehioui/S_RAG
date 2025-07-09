@@ -1,0 +1,68 @@
+je veux un scenario stbtester qui suit ce scénario
+Aller sur Live TV puis Aller dans STREAMING et sélectionner youtube, Attendre le chargement de youtube pandant 10s
+
+
+Je voudrais ajouter cette séquence à la fin du dernier scénario généré youtube apres Attendre 2 minutes, pause video pandant 10s,
+
+Je souhaite intégrer ce scénario à la fin du parcours existant. allez au menu de youtube play video puis avancer dans le video ensuite retourne au menu youtube, Quitter youtube proprement en fin Retourner sur Live TV
+
+essaie de lancer sur youtube au cas ou amazon n'est pas accessible
+
+Je souhaite créer un scénario similaire au précédent, mais cette fois-ci appliqué à l'application Netflix Video
+
+ajoute une fonction de logging des erreurs des exeptions, le nom du logfile est tunisie.log
+
+utiliser dans ce code la Configuration dynamique
+
+Enchaîne un test Youtube, Amazon puis Netflix avec un seul retour à Live TV à la fin.
+
+
+
+
+je veux ajouter ce scenario à la dernière  Lancer une vidéo 
+Ajoute une vérification que la vidéo ne reste pas bloquée en noir pendant 1 minute après le lancement
+
+Si YouTube ne répond pas, bascule automatiquement vers Amazon Prime Video.
+
+Je veux surveiller le mouvement de la vidéo toutes les 10 minutes pendant une heure.
+
+
+
+
+L'objectif est de simuler un "Customer Journey" réaliste avec des actions variées, des pauses naturelles, des enchaînements logiques, et des durées crédibles entre les usages.
+
+Voici les contraintes que tu dois impérativement respecter :
+
+Intégrer des sessions avec des services réels :
+
+Netflix 
+
+YouTube 
+
+Amazon Prime 
+
+#Live TV et zapping entre chaînes (informations, sport, etc.)
+
+Respecter une distribution temporelle sur la journée :
+
+Matinée (live et zapping )
+
+Soirée (ex : streaming long, Netflix, etc.)
+
+Durées variées et crédibles pour chaque activité 
+
+
+
+
+
+
+
+sans commentaire
+
+
+
+
+
+
+Vérifier qu’il y a du mouvement à l’écran pendant une période définie (1h), avec vérification toutes les 15 minutes. puis
+Vérifier qu’il n’y a pas d’écran noir pendant une période définie (2h), avec vérification toutes les 15 minutes.

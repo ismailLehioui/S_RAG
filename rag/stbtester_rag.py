@@ -70,17 +70,35 @@ class STBTesterRAG:
             input_variables=["context", "question"],
             template="""
 Tu es un expert en automatisation de tests STBTester pour la plateforme Totalplay.
-Utilise UNIQUEMENT les informations du contexte fourni pour répondre à la demande de l'utilisateur.
-CONTEXTE:
-{context}
-DEMANDE:
-{question}
-INSTRUCTIONS :
-- Si la demande décrit un scénario de test, génère un script Python STBTester complet et fonctionnel, avec tous les imports nécessaires.
+Ta mission est d'être interactif et pertinent :
+- Si la demande de l'utilisateur nécessite la génération d'un script ou de code Python, tu DOIS TOUJOURS présenter le code dans un bloc markdown commençant par ```python et finissant par ``` (même pour un petit extrait ou un script minimal). N'affiche jamais de code en dehors de ce bloc.
+- Si la demande de l'utilisateur contient explicitement des mots comme "script", "code", "automatiser", "test", ou décrit un scénario de test, alors génère un script Python STBTester complet et fonctionnel, avec uniquement les imports et fonctions nécessaires, en suivant strictement le scénario ou la demande de l'utilisateur. N'utilise que les éléments du contexte pertinents, ne copie pas tout le contexte.
+- Si la demande contient un mot-clé d'action simple (ouvrir, aller à, accéder à, lancer, démarrer, etc.) et une application connue (ex: amazon, youtube, netflix, etc.), génère un script minimal pour réaliser cette action, même si la demande n'est pas très détaillée.
+- Si la demande contient seulement "code", "script" ou un mot-clé similaire SANS description d'action ou d'application, réponds poliment que tu as besoin d'un scénario ou d'une demande claire pour générer un script, et NE GÉNÈRE PAS de code.
 - Si la demande concerne la documentation, le fonctionnement, le rôle du framework, une question fréquente ou une explication sur une fonction, réponds par une explication textuelle claire et concise, sans générer de code.
-- Utilise exactement les fonctions et informations du contexte.
-- Si la question ne correspond à aucun cas connu, indique-le poliment.
-RÉPONSE :
+- Si la demande est une salutation, une question générale, ou ne correspond à aucun cas connu dans le contexte, réponds poliment par du texte, sans générer de code ni de script.
+- N'invente jamais de fonctions, d'importations ou de scénarios qui ne sont pas présents dans le contexte fourni.
+- Utilise exactement les fonctions et informations du contexte, et uniquement ce qui est nécessaire pour répondre à la demande.
+- Pour les imports dans un script, utilise ce format :
+import time
+import totalplay
+import sc_stbt
+import stbt_core as stbt
+from sc_stbt import <l'application>  # par exemple: from sc_stbt import amazon etc
+Jamais comme ceci :
+import time
+import sc_stbt
+from totalplay.Menu import to_live, to_menu
+from totalplay import select_menu_items, select_apps
+- Utilise une seule instance objet dans les classes d'applications, par exemple :
+amazon = sc_stbt.amazon.Menu()
+- Si la question ne correspond à aucun cas connu ou ne peut pas être traitée, indique-le poliment sans générer de code.
+
+CONTEXTE :
+{context}
+
+DEMANDE :
+{question}
 """,
         )
 
@@ -109,8 +127,6 @@ RÉPONSE :
             f"Titre: {test_case.get('title', '')}",
             f"Application: {test_case.get('application', '')}",
             f"Catégorie: {test_case.get('category', '')}",
-            f"Complexité: {test_case.get('complexity', '')}",
-            f"Durée estimée: {test_case.get('estimated_duration', '')}",
             f"Objectif: {test_case.get('objective', '')}",
             f"Prérequis: {test_case.get('preconditions', '')}",
         ]
@@ -214,7 +230,6 @@ RÉPONSE :
     def add_missing_imports(self, script: str) -> str:
         """Ajoute les imports Python nécessaires si manquants dans le script généré."""
         required_imports = [
-            "import stbt",
             "import totalplay",
             "import sc_stbt",
             "import time",
@@ -247,7 +262,7 @@ RÉPONSE :
         db_path = "db"
         hash_path = os.path.join(db_path, "data_hash.txt")
         if data_path is None:
-            data_path = "data/all_data.json"
+            data_path = "data/new_data.json"
         current_hash = self.get_file_hash(data_path)
         previous_hash = None
         if os.path.exists(hash_path):
@@ -263,8 +278,11 @@ RÉPONSE :
                 embedding_function=self.embeddings, persist_directory=db_path
             )
             logger.info("✅ Vectorstore chargée depuis le disque (pas de ré-embedding)")
+            # Ne pas recharger FAQ/framework_info pour éviter les doublons
         else:
             self.load_test_cases_data(json_data)
+            # Ajoute FAQ et framework_info après les tests
+            self.load_faq_and_framework_info(json_data)
             # Sauvegarde le hash courant
             os.makedirs(db_path, exist_ok=True)
             with open(hash_path, "w", encoding="utf-8") as f:
@@ -292,7 +310,57 @@ RÉPONSE :
             logger.error(f"❌ Erreur génération script (stream): {e}")
             raise
 
-    # Remplace l'appel à load_test_cases_data par ensure_vectorstore dans le pipeline principal
-    # Exemple d'utilisation dans scenario_runner.py :
-    # rag.ensure_vectorstore(json_data)
-    # rag.setup_qa_chain()
+    def load_faq_and_framework_info(self, json_data: Dict[str, Any]):
+        """
+        Ajoute les Q/R de assistant_faq et les sections de framework_info comme documents dans la vectorstore.
+        Cette version évite les plantages sur les valeurs non str/list/dict et gère les cas vides.
+        """
+        documents = []
+        # FAQ
+        for faq in json_data.get("assistant_faq", []):
+            try:
+                content = f"Question: {faq.get('question', '')}\nRéponse: {faq.get('answer', '')}"
+                metadata = {"type": "faq"}
+                documents.append(Document(page_content=content, metadata=metadata))
+            except Exception as e:
+                logger.warning(f"FAQ mal formée ignorée: {faq} ({e})")
+        # Framework info (on découpe chaque section)
+        fw = json_data.get("framework_info", {})
+        for key, value in fw.items():
+            try:
+                if isinstance(value, dict):
+                    for subkey, subval in value.items():
+                        content = f"{key.capitalize()} - {subkey}: {subval}"
+                        metadata = {
+                            "type": "framework_info",
+                            "section": key,
+                            "subsection": subkey,
+                        }
+                        documents.append(
+                            Document(page_content=content, metadata=metadata)
+                        )
+                elif isinstance(value, list):
+                    content = f"{key.capitalize()}:\n" + "\n".join(
+                        str(x) for x in value
+                    )
+                    metadata = {"type": "framework_info", "section": key}
+                    documents.append(Document(page_content=content, metadata=metadata))
+                elif value is not None:
+                    content = f"{key.capitalize()}: {value}"
+                    metadata = {"type": "framework_info", "section": key}
+                    documents.append(Document(page_content=content, metadata=metadata))
+            except Exception as e:
+                logger.warning(f"framework_info mal formée ignorée: {key} ({e})")
+        # Ajoute à la vectorstore existante ou crée une nouvelle
+        if documents:
+            if self.vectorstore:
+                self.vectorstore.add_documents(documents)
+            else:
+                self.vectorstore = Chroma.from_documents(
+                    documents=documents,
+                    embedding=self.embeddings,
+                    persist_directory="db",
+                )
+            print(f"{len(documents)} docs FAQ/framework_info ajoutés à la vectorstore.")
+        else:
+            print("Aucun document FAQ/framework_info à ajouter.")

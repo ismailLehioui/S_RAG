@@ -5,7 +5,7 @@ from rag.data_loader import load_scenarios_from_file
 
 def run_rag():
     application = "youtube"
-    data_path = "data/all_data.json"
+    data_path = "data/new_data.json"
     output_dir = f"generated_tests/{application}"
     scenario_file = "scenarios/yaml/scenario.yaml"  # Peut être .yaml, .json, .txt
     # scenarios = [

@@ -216,7 +216,7 @@ if (
 # Initialisation du moteur RAG (chargement des cas de test une seule fois)
 if "rag" not in st.session_state:
     rag = STBTesterRAG()
-    with open("data/all_data.json", "r", encoding="utf-8") as f:
+    with open("data/new_data.json", "r", encoding="utf-8") as f:
         json_data = json.load(f)
     rag.ensure_vectorstore(json_data)
     rag.setup_qa_chain()
@@ -270,38 +270,116 @@ if prompt:
         code_placeholder = st.empty()
         script = ""
         reasoning = ""
+        # Ajout de l'historique conversationnel dans le prompt
+        # Prend les 3 derniers échanges user/assistant (jusqu'à 6 messages)
+        last_msgs = [
+            m
+            for m in st.session_state.messages[:-1]
+            if m["role"] in ("user", "assistant")
+        ]
+        # On veut les 3 dernières paires (user/assistant), donc on part de la fin
+        pairs = []
+        i = len(last_msgs) - 1
+        while i >= 0 and len(pairs) < 3:
+            if (
+                last_msgs[i]["role"] == "assistant"
+                and i > 0
+                and last_msgs[i - 1]["role"] == "user"
+            ):
+                pairs.append((last_msgs[i - 1], last_msgs[i]))
+                i -= 2
+            else:
+                i -= 1
+        # On remet dans l'ordre chronologique
+        pairs = pairs[::-1]
+        history = []
+        for user_msg, assistant_msg in pairs:
+            history.append(f"Utilisateur : {user_msg['content']}")
+            history.append(f"Assistant : {assistant_msg['content']}")
+        history_text = "\n".join(history)
+        full_prompt = (
+            f"{history_text}\nUtilisateur : {prompt}" if history_text else prompt
+        )
         with st.spinner("Le modèle réfléchit et génère le script..."):
-            for chunk in rag.stream_generate_script(prompt):
+            # --- Streaming mot à mot uniquement sur la réponse réelle (hors <think>) ---
+            display_placeholder = st.empty()
+            streamed_real_response = ""
+            in_think = False
+            for chunk in rag.stream_generate_script(full_prompt):
                 script += chunk
-        # Séparation raisonnement <think>...</think> et réponse finale
-        import re
+                # Ajoute chunk à la partie "réponse réelle" seulement si on n'est pas dans <think>
+                i = 0
+                while i < len(chunk):
+                    # Détecte début <think>
+                    if not in_think and chunk[i : i + 7].lower() == "<think>":
+                        in_think = True
+                        i += 7
+                        continue
+                    # Détecte fin </think>
+                    if in_think and chunk[i : i + 8].lower() == "</think>":
+                        in_think = False
+                        i += 8
+                        continue
+                    if not in_think:
+                        streamed_real_response += chunk[i]
+                        # Affiche en temps réel mot à mot
+                        display_placeholder.markdown(
+                            f"<div style='background-color:#f0f2f6; padding:8px; border-radius:6px; margin-bottom:2px; font-size:14px; font-family: 'Segoe UI', Arial, sans-serif;'><pre style='font-size:12px; font-family:monospace; background:transparent; border:none; margin:0; padding:0; white-space:pre-wrap;'>{streamed_real_response}</pre></div>",
+                            unsafe_allow_html=True,
+                        )
+                    i += 1
+        # --- Affichage raisonnement/thinking (think) dans l'expander uniquement si <think> et </think> sont présents ---
+        if "<think>" in script and "</think>" in script:
+            start_idx = script.lower().find("<think>") + len("<think>")
+            end_idx = script.lower().find("</think>")
+            reasoning = script[start_idx:end_idx].strip()
+            # Nettoyage raisonnement
+            import re
 
-        think_match = re.search(
-            r"<think>(.*?)</think>", script, re.DOTALL | re.IGNORECASE
-        )
-        if think_match:
-            reasoning = think_match.group(1).strip()
-            # Retire la partie <think>...</think> de la réponse finale
-            response_finale = re.sub(
+            cleaned_reasoning = reasoning
+            cleaned_reasoning = re.sub(
+                r"^(#+) ?(.*)$", r"\2", cleaned_reasoning, flags=re.MULTILINE
+            )
+            cleaned_reasoning = re.sub(
+                r"<h[1-6][^>]*>.*?</h[1-6]>", "", cleaned_reasoning, flags=re.DOTALL
+            )
+            cleaned_reasoning = re.sub(
+                r"<a[^>]*>.*?</a>", "", cleaned_reasoning, flags=re.DOTALL
+            )
+            cleaned_reasoning = re.sub(
+                r"<span[^>]*>.*?</span>", "", cleaned_reasoning, flags=re.DOTALL
+            )
+            cleaned_reasoning = re.sub(
+                r"<svg[^>]*>.*?</svg>", "", cleaned_reasoning, flags=re.DOTALL
+            )
+            cleaned_reasoning = re.sub(r"<[^>]+>", "", cleaned_reasoning)
+            if len(cleaned_reasoning) > 1000:
+                cleaned_reasoning = cleaned_reasoning[:1000] + "... [contenu tronqué]"
+            # Ajout à l'historique : raisonnement et réponse (hors <think>)
+            import re
+
+            script_no_think = re.sub(
                 r"<think>.*?</think>", "", script, flags=re.DOTALL | re.IGNORECASE
-            ).strip()
-        else:
-            response_finale = script.strip()
-        # Affichage de la réponse finale (hors raisonnement)
-        st.session_state.messages.append(
-            {"role": "assistant", "content": response_finale}
-        )
-        st.markdown(
-            f"<div style='background-color:#f0f2f6; padding:8px; border-radius:6px; margin-bottom:2px; font-size:14px; font-family: 'Segoe UI', Arial, sans-serif;'><pre style='font-size:12px; font-family:monospace; background:transparent; border:none; margin:0; padding:0; white-space:pre-wrap;'>{response_finale}</pre></div>",
-            unsafe_allow_html=True,
-        )
-        # Affichage du raisonnement/thinking uniquement si le modèle a généré explicitement un <think>
-        if reasoning:
+            )
+            script_no_think = script_no_think.strip()
+            st.session_state.messages.append(
+                {"role": "assistant", "content": script_no_think}
+            )
+            with open(history_path, "w", encoding="utf-8") as f_conv:
+                json.dump(
+                    st.session_state.messages, f_conv, ensure_ascii=False, indent=2
+                )
             with st.expander("Afficher/masquer le raisonnement du modèle (optionnel)"):
-                st.info(reasoning)
-        # Sauvegarde de l'historique de conversation après chaque échange
-        with open(history_path, "w", encoding="utf-8") as f_conv:
-            json.dump(st.session_state.messages, f_conv, ensure_ascii=False, indent=2)
+                st.info(cleaned_reasoning)
+        else:
+            # Si pas de balise <think>...</think>, ajoute la réponse complète dans l'historique
+            st.session_state.messages.append(
+                {"role": "assistant", "content": script.strip()}
+            )
+            with open(history_path, "w", encoding="utf-8") as f_conv:
+                json.dump(
+                    st.session_state.messages, f_conv, ensure_ascii=False, indent=2
+                )
     except Exception as e:
         response = f"Erreur lors de la génération du script : {e}"
         st.session_state.messages.append({"role": "assistant", "content": response})

@@ -1,0 +1,87 @@
+ajouter ces scenario dans la dataset sachant que je les veux flexible c-a-d je peut les manipuler avec le prompt du chatbot
+
+zapping up et zapping down: 
+import bt
+import sc_stbt
+import stbt_core as stbt
+import time
+
+
+templates = sc_stbt.get_generic_template_path(trunk_template=False)
+info_banner_template = templates + "info_banner.png"
+
+if __name__ == '__main__':
+    bt.Menu.to_live()
+    sc_stbt.press("KEY_1")
+    time.sleep(5)
+    sc_stbt.zapping_v3(key="KEY_CHANNELUP",
+                        info_banner_template=info_banner_template,
+                        info_banner=True,consecutive_frames="10/200",
+                        detect_motion=True, timeout_secs=15)
+    
+    sc_stbt.zapping_v3(key="KEY_CHANNELDOWN",
+                        info_banner_template=info_banner_template,
+                        info_banner=True,consecutive_frames="10/200",
+                        detect_motion=True, timeout_secs=15)
+
+
+zapping numerique 
+import bt
+import sc_stbt
+import stbt_core as stbt
+import time
+
+
+templates = sc_stbt.get_generic_template_path(trunk_template=False)
+info_banner_template = templates + "info_banner.png"
+channels = ["1", "2","5"]
+
+if __name__ == '__main__':
+    bt.Menu.to_live()
+    for _ in range(3):
+        for channel in channels:
+            sc_stbt.zapping_v3(lcn=channel,
+                                info_banner_template=info_banner_template,
+                                info_banner=True,consecutive_frames="10/200",
+                                detect_motion=True, timeout_secs=15)
+    
+
+check motion live pour verifier que live est en cours  :
+import totalplay
+import sc_stbt
+import stbt_core as stbt
+import time
+
+if __name__ == '__main__':
+    totalplay.Menu.to_live()
+    sc_stbt.zapping_v3(lcn="1",info_banner=False,detect_motion=False)
+    time.sleep(5)
+    sc_stbt.wait_for_motion(consecutive_frames="300/1200",
+                            timeout_secs=30)
+
+mute live sound
+# assuming stb in unmuted at the beginning
+import sc_stbt
+import totalplay
+
+
+if __name__ == '__main__':
+
+    totalplay.Menu.to_live()
+    sc_stbt.press_and_wait("KEY_MUTE", timeout_secs=3)
+    assert not (sc_stbt.get_rms_volume(duration_secs=10, audio_presence_threshold=-60)), \
+        "Audio found after pressing KEY_MUTE"
+
+unmute live sount 
+# assuming stb in unmuted at the beginning
+import sc_stbt
+import totalplay
+
+
+if __name__ == '__main__':
+
+    totalplay.Menu.to_live()
+    sc_stbt.press_and_wait("KEY_MUTE", timeout_secs=3)
+    assert sc_stbt.get_rms_volume(duration_secs=10, audio_presence_threshold=-60), \
+        "Audio not found after pressing KEY_UNMUTE"
+
